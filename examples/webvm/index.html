@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EarnIdle VM — Browser Compute Node</title>
+</head>
+<body>
+  <h1>EarnIdle VM — Browser Compute Node</h1>
+  <p>Runnable compute session with EarnIdle-style payout hooks.</p>
+  <button id="start">Start VM session</button>
+  <button id="stop">Stop</button>
+  <pre id="status" class="log">Idle.</pre>
+  <script type="module">
+    const startBtn = document.getElementById('start');
+    const stopBtn = document.getElementById('stop');
+    const status = document.getElementById('status');
+    let running = false;
+    let tick = null;
+    let payout = 0;
+    let jobs = 0;
+
+    startBtn.addEventListener('click', () => {
+      running = true;
+      payout = 0;
+      jobs = 0;
+      status.textContent = '';
+      log('VM session started.');
+      runSession();
+    });
+
+    stopBtn.addEventListener('click', () => {
+      running = false;
+      clearInterval(tick);
+      log(`VM session stopped. jobs=${jobs} payout=${payout.toFixed(4)}`);
+    });
+
+    function runSession() {
+      tick = setInterval(() => {
+        if (!running) return;
+        const job = Math.floor(Math.random() * 1000);
+        const value = Math.sin(job) * Math.cos(job);
+        jobs++;
+        payout += 0.01;
+        log(`Job ${job} complete. value=${value.toFixed(4)} jobs=${jobs}`);
+      }, 1000);
+    }
+
+    function log(message) {
+      status.textContent += `[${new Date().toISOString().slice(11, 19)}] ${message}\n`;
+      status.scrollTop = status.scrollHeight;
+    }
+  </script>
+</body>
+</html>
