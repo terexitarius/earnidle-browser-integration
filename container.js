@@ -2,18 +2,12 @@
 // Browser-side service lifecycle control and log stream.
 //
 // Each "service" can be:
-//  browser-native — implemented in-page or in a worker
-//  external       — requires a backend at a URI, controlled here
+//  browser — runs in the page or worker (no compile step needed)
+//  backend-required — needs a real backend runtime outside the browser
 const POLL_MS = 30000;
 const state = {
   services: {
-    idleInference: { id: 'idleInference', label: 'EarnIdle Inference', kind: 'browser-native', status: 'stopped', config: { nodeId: 'node-1', wallet: 'wallet-1' } },
-    getGrass:      { id: 'getGrass',       label: 'get-grass (Solana)',  kind: 'external',       status: 'stopped', config: { host: 'http://127.0.0.1:8081', user: '', pass: '' } },
-    masq:          { id: 'masq',           label: 'MASQ (ETH/Polygon/Base)', kind: 'external', status: 'stopped', config: { host: 'http://127.0.0.1:8082', configFile: '/etc/masq/config.toml' } },
-    oasis:         { id: 'oasis',          label: 'Oasis (BNB)',        kind: 'external',       status: 'stopped', config: { host: 'http://127.0.0.1:8083', unsafe: '1' } },
-    rivalz:        { id: 'rivalz',         label: 'Rivalz (ETH/SOL/ARB/BASE)', kind: 'external', status: 'stopped', config: { host: 'http://127.0.0.1:30000', keystore: 'https://vault.rivalz.ai:8200' } },
-    nunet:         { id: 'nunet',          label: 'NuNet (ETH/BNB)',   kind: 'external',       status: 'stopped', config: { backend: 'http://127.0.0.1:8080', frontend: 'http://127.0.0.1:5173' } },
-    nodepay:       { id: 'nodepay',        label: 'NodePay (SOL)',     kind: 'browser-native', status: 'stopped', config: { token: '' } },
+    idleInference: { id: 'idleInference', label: 'EarnIdle Inference', kind: 'browser', status: 'stopped', config: { nodeId: 'node-1', wallet: 'wallet-1' } },
   },
   workers: {},
 };
@@ -37,7 +31,7 @@ function disableControls(id, disabled) {
 }
 
 function renderService(svc) {
-  const isBrowser = svc.kind === 'browser-native';
+  const isBrowser = svc.kind === 'browser';
   const startStopLabel = svc.status === 'running' ? 'Stop' : 'Start';
   const startStopClass = svc.status === 'running' ? 'danger' : '';
 
@@ -55,9 +49,10 @@ function renderService(svc) {
     </header>
     <fieldset id="cfg-${svc.id}">
       <legend>Configuration</legend>
-      ${Object.entries(svc.config).map(([k, v]) => `<label>${k} <input id="cfg-${svc.id}-${k}" value="${escapeHtml(String(v))}" /></label>`).join('\n')}
+      ${isBrowser ? '' : Object.entries(svc.config).map(([k, v]) => `<label>${k} <input id="cfg-${svc.id}-${k}" value="${escapeHtml(String(v))}" /></label>`).join('\n')}
+      ${isBrowser ? '<div class="info">No compile step needed for this browser resource.</div>' : ''}
     </fieldset>
-    <div class="log" id="log-${svc.id}">Waiting for lifecycle events.</div>
+    <div class="log" id="log-${svc.id}">${isBrowser ? 'Ready to start browser worker with wallet/node config.' : 'Requires a configured backend runtime outside the browser.'}</div>
   </div>`;
 }
 
@@ -140,14 +135,7 @@ async function startBrowserNative(id, svc) {
     worker.postMessage({ type: 'start', data: { nodeId, wallet } });
     return;
   }
-  if (id === 'nodepay') {
-    const token = svc.config.token || localStorage.getItem('np_webapp_token');
-    if (!token) throw new Error('NodePay token is missing. Fill token in config or capture it from the dashboard.');
-    appendLog(id, `NodePay session starting from token`, 'info');
-    if (!state.workers[id]) state.workers[id] = { terminate: () => {} };
-    await pollNodePayStatus(id);
-    return;
-  }
+  throw new Error('Unknown browser service: ' + id);
 }
 
 async function startExternal(id, svc) {

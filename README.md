@@ -1,23 +1,26 @@
 # earnidle-browser-integration
 
-Run-in-browser adapters for six EarnIdle-style earn projects:
-- EarnIdle inference (modeled from `play.earnidle.com`)
-- get-grass (Solana)
-- MASQ (ETH, Polygon, Base)
-- Oasis (BNB)
-- Rivalz (ETH, SOL, ARB, BASE)
-- NuNet (ETH, BNB)
-- NodePay (SOL)
+Browser-native EarnIdle inference.
 
-Each adapter can be exercised inside the browser container in demo mode, with a documented bridge path for real production backends where browser-only execution is not viable.
+## Requirements
 
-## Run the container
+- No compilation
+- No build step
+- No npm install
+
+## Run
 
 ```bash
 cd /home/user/earnidle-browser-integration
-bash run.sh
-# open http://localhost:3000/container
+python3 -m http.server 8080
+# open http://localhost:8080/container
 ```
 
-`npx serve` redirects `container.html` to `/container`. Use the `/container` URL.
+Works in any modern browser. The inference worker runs entirely inside the browser container.
 
+## Included
+
+- `container.html` — browser container page
+- `container.js` — service lifecycle for idleInference
+- `src/worker.js` — EarnIdle inference worker
+- `src/resources/inference.worker.js` — WebGPU/WASM inference worker

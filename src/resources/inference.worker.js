@@ -1,4 +1,4 @@
-// Inference worker — browser-native WebGPU/WASM using Transformers.js
+// Inference worker — browser Web Worker with WebGPU/WASM using Transformers.js
 // Start a resource contribution for AI inference. Polls jobs, runs model, submits outputs.
 
 self.onmessage = async (event) => {
