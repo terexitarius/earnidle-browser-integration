@@ -8,6 +8,7 @@ const POLL_MS = 30000;
 const state = {
   services: {
     idleInference: { id: 'idleInference', label: 'EarnIdle Inference', kind: 'browser', status: 'stopped', config: { nodeId: 'node-1', wallet: 'wallet-1' } },
+    earnIdleVM: { id: 'earnIdleVM', label: 'EarnIdle VM', kind: 'browser', status: 'stopped', config: { nodeId: 'node-1', wallet: 'wallet-1', workload: 'bash' } },
   },
   workers: {},
 };
