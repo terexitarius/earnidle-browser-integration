@@ -119,10 +119,10 @@ async function startService(id) {
 }
 
 async function startBrowserNative(id, svc) {
-  if (id === 'idleInference') {
-    const { nodeId, wallet } = svc.config;
-    appendLog(id, `Starting inference worker for nodeId=${nodeId} wallet=${wallet}`, 'info');
-    const workerPath = new URL('./src/resources/inference.worker.js', import.meta.url).toString();
+  const { nodeId, wallet, workload } = svc.config || {};
+  if (id === 'earnIdleVM') {
+    appendLog(id, `Starting EarnIdle VM worker nodeId=${nodeId || 'node-1'} wallet=${wallet || 'wallet-1'} workload=${workload || 'bash'}`, 'info');
+    const workerPath = new URL('./src/resources/vm.worker.js', import.meta.url).toString();
     const worker = new Worker(workerPath, { type: 'module' });
     state.workers[id] = worker;
 
@@ -135,13 +135,22 @@ async function startBrowserNative(id, svc) {
     worker.onmessage = (event) => {
       const { type, status, jobId, payout, event: eventName, error } = event.data || {};
       if (type === 'status') setStatus(id, status);
+      if (type === 'boot') appendLog(id, `boot sessionId=${event?.sessionId || ''}`, 'out');
+      if (type === 'started') appendLog(id, `started workload=${event?.workload || ''}`, 'out');
       if (type === 'job') appendLog(id, `Job ${jobId}: ${event?.status || type}`, 'out');
-      if (type === 'earnings') appendLog(id, `Payout ${payout}`, 'out');
+      if (type === 'earnings') appendLog(id, `Payout ${payout} total=${event?.total ?? 0}`, 'out');
+      if (type === 'stopped') appendLog(id, `stopped jobs=${event?.jobs} payout=${event?.payout}`, 'out');
       if (type === 'error') appendLog(id, error || 'error', 'err');
     };
-    worker.postMessage({ type: 'start', data: { nodeId, wallet } });
+    worker.postMessage({ type: 'start', data: { nodeId: nodeId || 'node-1', wallet: wallet || 'wallet-1', workload: workload || 'bash' } });
     return;
   }
+
+  if (id === 'idleInference') {
+    appendLog(id, `idleInference is superseded by earnIdleVM in this container. Starting VM worker instead.`, 'info');
+    return startBrowserNative('earnIdleVM', state.services.earnIdleVM);
+  }
+
   throw new Error('Unknown browser service: ' + id);
 }
 

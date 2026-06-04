@@ -9,7 +9,7 @@ const root = resolve(__dirname, '..');
 const required = [
   'container.html',
   'container.js',
-  'src/worker.js',
+  'src/resources/vm.worker.js',
   'src/resources/inference.worker.js',
   'tests/verification.mjs',
 ];
@@ -33,8 +33,12 @@ const actual = readdirSync(examplesDir);
 const missing = expected.filter((file) => !actual.includes(file));
 assert.strictEqual(missing.length, 0, missing.length ? 'missing example files: ' + missing.join(', ') : 'ok');
 
-const inferenceWorker = readFileSync(resolve(root, 'src/resources/inference.worker.js'), 'utf8');
-assert.ok(inferenceWorker.includes('text-generation'), 'inference worker should implement polling job logic');
+if (!existsSync(resolve(root, 'examples/webvm/index.html'))) {
+  throw new Error('missing: examples/webvm/index.html');
+}
+
+const vmWorker = readFileSync(resolve(root, 'src/resources/vm.worker.js'), 'utf8');
+assert.ok(vmWorker.includes('submitResult'), 'vm worker should implement EarnIdle submit hook');
 
 const containerJs = readFileSync(resolve(root, 'container.js'), 'utf8');
-assert.ok(containerJs.includes('idleInference'), 'container.js should define idleInference service');
+assert.ok(containerJs.includes('earnIdleVM'), 'container.js should define earnIdleVM service');
