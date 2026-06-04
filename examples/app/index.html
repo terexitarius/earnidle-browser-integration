@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EarnIdle browser integration demo</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; background: #0b0c10; color: #c5c6c7; padding: 24px; }
+    .panel { border: 1px solid #1f2833; background: #0b0c10; padding: 16px; border-radius: 12px; max-width: 420px; }
+    input { margin: 6px 0 12px; width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #45a29e; background: #1f2833; color: #c5c6c7; }
+    button { padding: 10px 14px; border-radius: 10px; border: 0; background: #66fcf1; color: #0b0c10; font-weight: 700; cursor: pointer; }
+    .log { margin-top: 12px; padding: 12px; background: #1f2833; color: #c5c6c7; border-radius: 10px; min-height: 80px; max-height: 220px; overflow: auto; }
+    .status { margin-top: 10px; color: #45a29e; }
+  </style>
+</head>
+<body>
+  <h1>EarnIdle browser tab integration</h1>
+  <p class="status">This is an example page you can point a browser container at.</p>
+  <div class="panel">
+    <label>Node ID</label>
+    <input id="nodeId" placeholder="your node id" />
+    <label>Wallet</label>
+    <input id="wallet" placeholder="your wallet" />
+    <button id="start">Start background earning</button>
+    <button id="stop">Stop</button>
+    <div class="log" id="log">Idle.\n</div>
+  </div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
