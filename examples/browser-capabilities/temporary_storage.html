@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Temporary Storage Capability</title>
+</head>
+<body>
+  <h1>Temporary Storage (IndexedDB / Cache API)</h1>
+  <p>Query-store pattern with tally and cleanup.</p>
+  <button id="write">Write dataset row</button>
+  <button id="read">Read last row</button>
+  <button id="clear">Clear</button>
+  <pre id="status" class="log">Idle.</pre>
+  <script type="module">
+    const writeBtn = document.getElementById('write');
+    const readBtn = document.getElementById('read');
+    const clearBtn = document.getElementById('clear');
+    const status = document.getElementById('status');
+    const DB_NAME = 'browser-temp-db';
+    const STORE = 'dataset';
+
+    writeBtn.addEventListener('click', async () => {
+      try {
+        const db = await idbOpen();
+        const tx = db.transaction(STORE, 'readwrite');
+        tx.objectStore(STORE).put({ id: crypto.randomUUID(), timestamp: Date.now(), value: Math.random() });
+        await tx.done;
+        log('Wrote row');
+      } catch (error) {
+        log(`Write error: ${error.message}`);
+      }
+    });
+
+    readBtn.addEventListener('click', async () => {
+      try {
+        const db = await idbOpen();
+        const request = db.transaction(STORE, 'readonly').objectStore(STORE).getAll();
+        const rows = await request;
+        const last = rows[rows.length - 1];
+        log(`Last row: ${last ? `${last.id} value=${last.value.toFixed(4)}` : 'none'}`);
+      } catch (error) {
+        log(`Read error: ${error.message}`);
+      }
+    });
+
+    clearBtn.addEventListener('click', async () => {
+      try {
+        const db = await idbOpen();
+        const tx = db.transaction(STORE, 'readwrite');
+        tx.objectStore(STORE).clear();
+        await tx.done;
+        log('Dataset cleared.');
+      } catch (error) {
+        log(`Clear failed: ${error.message}`);
+      }
+    });
+
+    async function idbOpen() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
+        request.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
+        };
+      });
+    }
+
+    function log(message) {
+      status.textContent += `[${new Date().toISOString().slice(11, 19)}] ${message}\n`;
+    }
+  </script>
+</body>
+</html>

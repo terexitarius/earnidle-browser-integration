@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Memory / Caching Capability</title>
+</head>
+<body>
+  <h1>Memory footprint / Caching</h1>
+  <p>Cache API-backed manifest and object-store emulation.</p>
+  <button id="store">Store object</button>
+  <button id="retrieve">Retrieve object</button>
+  <pre id="status" class="log">Idle.</pre>
+  <script type="module">
+    const storeBtn = document.getElementById('store');
+    const retrieveBtn = document.getElementById('retrieve');
+    const status = document.getElementById('status');
+    const key = 'browser-capability-cache:v1';
+    const payload = JSON.stringify({ version: 1, tensors: Array.from({ length: 256 }, () => Math.random()), cachedAt: Date.now() });
+
+    storeBtn.addEventListener('click', async () => {
+      try {
+        const cache = await caches.open('browser-capability-cache');
+        const response = new Response(payload, { headers: { 'Content-Type': 'application/json' } });
+        await cache.put(key, response);
+        log(`Stored ${payload.length} bytes.`);
+      } catch (error) {
+        log(`Cache write failed: ${error.message}`);
+      }
+    });
+
+    retrieveBtn.addEventListener('click', async () => {
+      try {
+        const cache = await caches.open('browser-capability-cache');
+        const response = await cache.match(key);
+        if (!response) {
+          log('Cache miss.');
+          return;
+        }
+        const data = await response.json();
+        log(`Retrieved object. tensorCount=${data.tensors.length} cachedAt=${new Date(data.cachedAt).toISOString()}`);
+      } catch (error) {
+        log(`Cache read failed: ${error.message}`);
+      }
+    });
+
+    function log(message) {
+      status.textContent += `[${new Date().toISOString().slice(11, 19)}] ${message}\n`;
+    }
+  </script>
+</body>
+</html>

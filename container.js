@@ -121,16 +121,22 @@ async function startBrowserNative(id, svc) {
   if (id === 'idleInference') {
     const { nodeId, wallet } = svc.config;
     appendLog(id, `Starting inference worker for nodeId=${nodeId} wallet=${wallet}`, 'info');
-    const workerPath = new URL('./src/worker.js', import.meta.url).toString();
+    const workerPath = new URL('./src/resources/inference.worker.js', import.meta.url).toString();
     const worker = new Worker(workerPath, { type: 'module' });
     state.workers[id] = worker;
 
+    worker.onerror = (error) => {
+      appendLog(id, `Worker error: ${error.message}`, 'err');
+      setStatus(id, 'error');
+      disableControls(id, false);
+    };
+
     worker.onmessage = (event) => {
-      const { type, status, jobId, payout, event: eventName } = event.data || {};
+      const { type, status, jobId, payout, event: eventName, error } = event.data || {};
       if (type === 'status') setStatus(id, status);
       if (type === 'job') appendLog(id, `Job ${jobId}: ${event?.status || type}`, 'out');
       if (type === 'earnings') appendLog(id, `Payout ${payout}`, 'out');
-      if (type === 'error') appendLog(id, event?.message || 'error', 'err');
+      if (type === 'error') appendLog(id, error || 'error', 'err');
     };
     worker.postMessage({ type: 'start', data: { nodeId, wallet } });
     return;

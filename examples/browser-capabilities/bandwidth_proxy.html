@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bandwidth / Routing Capability</title>
+</head>
+<body>
+  <h1>Bandwidth / Routing (HTTP, WebSocket, WebRTC)</h1>
+  <p>Measured relay/routing surface. Metered via configured upstream service.</p>
+  <button id="start">Start routing</button>
+  <button id="stop">Stop</button>
+  <pre id="status" class="log">Idle.</pre>
+  <script type="module">
+    const start = document.getElementById('start');
+    const stop = document.getElementById('stop');
+    const status = document.getElementById('status');
+    let running = false;
+    let bytes = 0;
+    let controller = null;
+
+    start.addEventListener('click', async () => {
+      running = true;
+      bytes = 0;
+      status.textContent = 'Routing active\n';
+      log('Routing active.');
+      try {
+        controller = new AbortController();
+        await loop(controller.signal);
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          log(`Fatal: ${error.message}`);
+          running = false;
+        }
+      }
+    });
+
+    stop.addEventListener('click', () => {
+      running = false;
+      if (controller) controller.abort();
+      status.textContent += 'Stopped.\n';
+      log(`Stopped. Total relay=${bytes} bytes.`);
+    });
+
+    async function loop(signal) {
+      while (running && !signal.aborted) {
+        try {
+          const response = await fetch('https://api.earnidle.com/api/bandwidth/relay-check', { cache: 'no-store', signal });
+          const text = await response.text();
+          bytes += text.length;
+          log(`Relay ok +${text.length} bytes total=${bytes}`);
+        } catch (error) {
+          if (error.name === 'AbortError') break;
+          log(`Relay error: ${error.message}`);
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+
+    function log(message) {
+      status.textContent += `[${new Date().toISOString().slice(11, 19)}] ${message}\n`;
+    }
+  </script>
+</body>
+</html>

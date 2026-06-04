@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>EarnIdle Browser Container — Six Earn Services</title>
+  <title>EarnIdle Browser Container</title>
   <style>
     body {
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
@@ -14,6 +14,7 @@
     }
     h1 { color: #66fcf1; border-bottom: 1px solid #1f2833; padding-bottom: 8px; }
     h2 { color: #45a29e; margin-top: 16px; }
+    a { color: #66fcf1; }
     .service {
       border: 1px solid #1f2833;
       padding: 12px;
@@ -65,18 +66,24 @@
   </style>
 </head>
 <body>
-  <h1>EarnIdle Browser Container — Earn Service Control Plane</h1>
+  <h1>EarnIdle Browser Container</h1>
   <p>
-    Six earn services: EarnIdle inference, get-grass, MASQ, Oasis, Rivalz, NuNet, NodePay.
-    Browser-native inference and NodePay can run in-page; the other five require host-side backends.
-    This control plane enables you to create, configure, start, stop, and proxy-logs those services.
+    Browser-native EarnIdle inference and capability examples.
+    Each capability runs fully in-browser with no compile step.
   </p>
 
   <div id="services"></div>
 
+  <h2>Capability examples</h2>
+  <ul>
+    <li><a href="examples/browser-capabilities/bandwidth_proxy.html">Bandwidth / routing (HTTP, WebSocket, WebRTC)</a></li>
+    <li><a href="examples/browser-capabilities/cpu_compute.html">CPU (JS / WebAssembly compute)</a></li>
+    <li><a href="examples/browser-capabilities/gpu_compute.html">GPU via WebGPU / WebGL</a></li>
+    <li><a href="examples/browser-capabilities/memory_caching.html">Memory footprint / caching</a></li>
+    <li><a href="examples/browser-capabilities/temporary_storage.html">Temporary storage (IndexedDB, Cache API)</a></li>
+    <li><a href="examples/browser-capabilities/micro_sensors.html">Micro-sensors / RTC (camera/mic)</a></li>
+  </ul>
+
   <script src="./container.js"></script>
-  <script src="./warehouse_wms.js"></script>
-  <script src="./task_solver.js"></script>
-  <script src="discovery/map.sh" type="module"></script>
 </body>
 </html>

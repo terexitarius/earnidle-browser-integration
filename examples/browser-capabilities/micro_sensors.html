@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Micro-sensors / RTC Capability</title>
+</head>
+<body>
+  <h1>Micro-sensors / RTC (camera/mic)</h1>
+  <p>Permission-gated stream acquisition, device enumeration, and explicit teardown pattern.</p>
+  <button id="start">Start camera</button>
+  <button id="stop">Stop</button>
+  <video id="preview" playsinline autoplay muted style="width:320px;height:240px;background:#000;"></video>
+  <pre id="status" class="log">Idle.</pre>
+  <script type="module">
+    const startBtn = document.getElementById('start');
+    const stopBtn = document.getElementById('stop');
+    const preview = document.getElementById('preview');
+    const status = document.getElementById('status');
+    let stream = null;
+
+    startBtn.addEventListener('click', async () => {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter((d) => d.kind === 'videoinput');
+        stream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 }, audio: false });
+        preview.srcObject = stream;
+        log(`Camera active. videoInputs=${videoDevices.length}`);
+      } catch (error) {
+        if (error.name === 'NotAllowedError') log('Permission denied: camera access was denied.');
+        else if (error.name === 'NotFoundError') log('No camera device found.');
+        else log(`Sensor error: ${error.name} ${error.message}`);
+      }
+    });
+
+    stopBtn.addEventListener('click', () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+        stream = null;
+        preview.srcObject = null;
+        log('Camera stopped and tracks released.');
+      }
+    });
+
+    function log(message) {
+      status.textContent += `[${new Date().toISOString().slice(11, 19)}] ${message}\n`;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GPU / WebGPU Capability</title>
+</head>
+<body>
+  <h1>GPU via WebGPU / WebGL</h1>
+  <p>Reports adapter availability, fallback path, and compute volume.</p>
+  <button id="start">Run compute</button>
+  <button id="stop">Stop</button>
+  <pre id="status" class="log">Idle.</pre>
+  <script type="module">
+    const start = document.getElementById('start');
+    const stop = document.getElementById('stop');
+    const status = document.getElementById('status');
+    let running = false;
+
+    start.addEventListener('click', async () => {
+      running = true;
+      log('Starting GPU capability test...');
+      try {
+        if (!navigator.gpu) throw new Error('WebGPU not available; using simulation');
+        const adapter = await navigator.gpu.requestAdapter();
+        if (!adapter) throw new Error('No GPU adapter');
+        log(`WebGPU adapter detected. Vendor: ${adapter.info?.vendor ?? 'unknown'}`);
+        await runLoop();
+      } catch (error) {
+        log(`GPU fallback: ${error.message}`);
+        await runLoop();
+      }
+    });
+
+    stop.addEventListener('click', () => {
+      running = false;
+      log('GPU job stopped by user.');
+    });
+
+    async function runLoop() {
+      let jobs = 0;
+      while (running) {
+        const t0 = performance.now();
+        const payload = new Float32Array(2048);
+        for (let i = 0; i < payload.length; i++) payload[i] = Math.sin(i) * 0.5;
+        const elapsed = (performance.now() - t0).toFixed(2);
+        jobs++;
+        log(`Batch ${jobs} ${payload.length} elements in ${elapsed}ms`);
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+      }
+    }
+
+    function log(message) {
+      status.textContent += `[${new Date().toISOString().slice(11, 19)}] ${message}\n`;
+    }
+  </script>
+</body>
+</html>

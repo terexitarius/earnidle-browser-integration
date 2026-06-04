@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CPU Compute Capability</title>
+</head>
+<body>
+  <h1>CPU / WebAssembly Compute</h1>
+  <p>Deterministic compute loop for rentable CPU work.</p>
+  <button id="start">Start compute</button>
+  <button id="stop">Stop</button>
+  <pre id="status" class="log">Idle.</pre>
+  <script type="module">
+    const start = document.getElementById('start');
+    const stop = document.getElementById('stop');
+    const status = document.getElementById('status');
+    let running = false;
+    let iterations = 0;
+    let cancel = false;
+
+    start.addEventListener('click', () => {
+      running = true;
+      cancel = false;
+      iterations = 0;
+      log('Compute loop started.');
+      run();
+    });
+
+    stop.addEventListener('click', () => {
+      cancel = true;
+      running = false;
+      log(`Compute stopped. iterations=${iterations}`);
+    });
+
+    async function run() {
+      while (running && !cancel) {
+        const t0 = performance.now();
+        let work = 0;
+        for (let i = 0; i < 5000; i++) work += Math.sin(i) * Math.cos(i);
+        const duration = performance.now() - t0;
+        iterations++;
+        if (iterations % 50 === 0) log(`iter=${iterations} work=${work.toFixed(2)} duration=${duration.toFixed(2)}ms`);
+        await new Promise((resolve) => setTimeout(resolve, 1));
+      }
+    }
+
+    function log(message) {
+      status.textContent += `[${new Date().toISOString().slice(11, 19)}] ${message}\n`;
+    }
+  </script>
+</body>
+</html>
