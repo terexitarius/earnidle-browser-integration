@@ -3,88 +3,375 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>EarnIdle Browser Container</title>
+  <title>EarnIdle Widget - TEST</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <style>
-    body {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      background: #0b0c10;
-      color: #c5c6c7;
-      padding: 16px;
-      line-height: 1.5;
+    :root {
+      color-scheme: dark;
+      --bg: #07080c;
+      --panel: rgba(15, 17, 21, 0.55);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f1f2f6;
+      --muted: #8b8fa3;
+      --accent: #66fcf1;
+      --accent-2: #45a29e;
+      --danger: #ff6b6b;
+      --success: #2ed573;
+      --warning: #ffbe0b;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      --client-accent: #66fcf1;
+      --publisher-accent: #ffbe0b;
+      --client-muted: #8b8fa3;
+      --publisher-muted: #d8b96b;
     }
-    h1 { color: #66fcf1; border-bottom: 1px solid #1f2833; padding-bottom: 8px; }
-    h2 { color: #45a29e; margin-top: 16px; }
-    a { color: #66fcf1; }
-    .service {
-      border: 1px solid #1f2833;
-      padding: 12px;
-      margin: 10px 0;
-      background: #111316;
-    }
-    .service header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .status { font-weight: 700; }
-    .status.running { color: #66fcf1; }
-    .status.stopped { color: #c5c6c7; }
-    .status.error { color: #ff6b6b; }
-    .status.starting { color: #ffd93d; }
-    button {
-      padding: 6px 12px;
-      border-radius: 6px;
-      border: 1px solid #45a29e;
-      background: #66fcf1;
-      color: #0b0c10;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    button:disabled {
-      background: #1f2833;
-      color: #c5c6c7;
-      cursor: not-allowed;
-    }
-    button.danger { background: #ff6b6b; color: #0b0c10; }
-    fieldset { border: 1px solid #1f2833; padding: 10px; margin: 8px 0; }
-    fieldset label { display: block; margin: 3px 0; }
-    fieldset input { width: 100%; padding: 4px 8px; background: #1f2833; color: #c5c6c7; border: 1px solid #45a29e; border-radius: 4px; }
-    .log {
-      background: #0b0c10;
-      border: 1px solid #1f2833;
-      padding: 8px;
-      max-height: 180px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      font-size: 12px;
-    }
-    .out { color: #66fcf1; }
-    .err { color: #ff6b6b; }
-    .info { color: #45a29e; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; font-family: 'Inter', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; background: radial-gradient(ellipse at 15% 10%, #0f1318 0%, #07080c 55%, #020203 100%); color: var(--text); }
+    #particles { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.65; pointer-events: none; }
+    .frame { position: relative; z-index: 1; height: 100vh; display: grid; grid-template-rows: auto 1fr auto; padding: 18px; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; gap: 10px; flex-wrap: wrap; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+    .brand span { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 0 18px rgba(102, 252, 241, 0.35); }
+    .step-pill { font-size: 12px; color: var(--muted); padding: 6px 10px; border: 1px solid var(--border); border-radius: 999px; background: rgba(255,255,255,0.03); }
+    .stage { display: grid; place-items: center; }
+    .card { width: min(920px, 100%); background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 26px; backdrop-filter: blur(18px) saturate(120%); -webkit-backdrop-filter: blur(18px) saturate(120%); box-shadow: var(--shadow); }
+    footer { display: flex; justify-content: space-between; align-items: center; padding: 10px 8px; gap: 10px; flex-wrap: wrap; }
+    .footer-hint { color: var(--muted); font-size: 12px; }
+    #status { color: var(--accent); font-size: 12px; }
+    #role { color: var(--accent); font-weight: 700; font-size: 12px; }
+    h1 { margin: 0 0 8px; font-size: 26px; letter-spacing: -0.02em; }
+    h2 { margin: 0 0 8px; font-size: 20px; letter-spacing: -0.01em; }
+    p { color: var(--muted); line-height: 1.55; margin: 0 0 14px; }
+    .kbd { display: inline-block; padding: 4px 8px; border-radius: 6px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); font-size: 12px; color: var(--accent); }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .btn { padding: 10px 16px; border-radius: 10px; border: 1px solid transparent; font-family: inherit; font-weight: 700; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, background 0.2s, border-color 0.2s; }
+    .btn-primary { background: var(--accent); color: #07080c; border-color: var(--accent); box-shadow: 0 10px 30px rgba(102, 252, 241, 0.25); }
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn-secondary { background: transparent; color: var(--text); border-color: var(--border); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+    .list { display: grid; gap: 14px; }
+    .list-item { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; padding: 14px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); }
+    .grid { display: grid; gap: 12px; }
+    .tile { padding: 14px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); }
+    .tile .value { font-size: 20px; font-weight: 800; }
+    .tile .label { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .step { display: none; animation: fade 0.35s ease; }
+    .step.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .strobe { display: inline-block; width: 8px; height: 8px; border-radius: 999px; background: var(--success); margin-right: 6px; vertical-align: middle; animation: strobe 1.5s linear infinite; }
+    .strobe.warn { background: var(--warning); }
+    .strobe.error { background: var(--danger); }
+    .strobe.idle { background: var(--muted); animation: none; }
+    @keyframes strobe { 0% { opacity: 1; transform: scale(1.05); } 50% { opacity: 0.35; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1.05); } }
+    [data-role="client"] { --accent: #66fcf1; --accent-2: #45a29e; --muted: #8b8fa3; }
+    [data-role="publisher"] { --accent: #ffbe0b; --accent-2: #d8b96b; --muted: #d8b96b; }
+    .pulse { animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(102, 252, 241, 0.5); } 70% { box-shadow: 0 0 0 10px rgba(102, 252, 241, 0); } 100% { box-shadow: 0 0 0 0 rgba(102, 252, 241, 0); } }
   </style>
 </head>
-<body>
-  <h1>EarnIdle Browser Container</h1>
-  <p>
-    Browser-native EarnIdle inference and capability examples.
-    Each capability runs fully in-browser with no compile step.
-  </p>
+<body data-role="client">
+  <canvas id="particles"></canvas>
+  <div class="frame">
+    <header>
+      <div class="brand"><span></span><strong>EarnIdle</strong></div>
+      <div class="row">
+        <button class="btn btn-secondary" data-role="client">Client</button>
+        <button class="btn btn-secondary" data-role="publisher">Publisher</button>
+      </div>
+      <div class="step-pill" id="step-pill">Step 1 / 6</div>
+    </header>
 
-  <div id="services"></div>
+    <main class="stage">
+      <div class="card step active" data-step="1" data-role="client">
+        <h1>Welcome / Trust</h1>
+        <p>Build trust and transparency before requesting consent.</p>
+        <div class="list" style="margin-top:14px;">
+          <div class="list-item"><div><strong>Share spare resources.</strong><p class="muted">Earn rewards by sharing idle browser compute.</p></div><div class="icon">⚡</div></div>
+          <div class="list-item"><div><strong>Private &amp; Secure</strong><p class="muted">Your data is never accessed.</p></div><div class="icon">🔒</div></div>
+          <div class="list-item"><div><strong>You're in Control</strong><p class="muted">Set your limits. Pause anytime.</p></div><div class="icon">🎚️</div></div>
+          <div class="list-item"><div><strong>Earn Rewards</strong><p class="muted">Get paid for your spare resources.</p></div><div class="icon">🎁</div></div>
+        </div>
+        <div class="row" style="justify-content:space-between; margin-top:18px;">
+          <button class="btn btn-secondary" data-action="decline">Not Now</button>
+          <button class="btn btn-primary" data-action="advance" data-to="2">Continue</button>
+        </div>
+      </div>
 
-  <h2>Capability examples</h2>
-  <ul>
-    <li><a href="examples/browser-capabilities/bandwidth_proxy.html">Bandwidth / routing (HTTP, WebSocket, WebRTC)</a></li>
-    <li><a href="examples/browser-capabilities/cpu_compute.html">CPU (JS / WebAssembly compute)</a></li>
-    <li><a href="examples/browser-capabilities/gpu_compute.html">GPU via WebGPU / WebGL</a></li>
-    <li><a href="examples/browser-capabilities/memory_caching.html">Memory / caching</a></li>
-    <li><a href="examples/browser-capabilities/temporary_storage.html">Temporary storage (IndexedDB, Cache API)</a></li>
-    <li><a href="examples/browser-capabilities/micro_sensors.html">Micro-sensors / RTC (camera/mic)</a></li>
-    <li><a href="examples/webvm/index.html">EarnIdle VM — browser compute node</a></li>
-  </ul>
+      <div class="card step" data-step="2" data-role="client">
+        <h1>Sign in &amp; Create Wallet</h1>
+        <p>Sign in to get started. A rewards wallet is created automatically.</p>
+        <div class="row" style="justify-content:space-between; margin-top:18px;">
+          <button class="btn btn-secondary" data-action="back">Back</button>
+          <button class="btn btn-primary" data-action="privy-login">Continue</button>
+        </div>
+      </div>
 
-  <script src="./container.js"></script>
+      <div class="card step" data-step="3" data-role="client">
+        <h1>Resource Consent</h1>
+        <p>Choose which resources to share and set your limits.</p>
+        <div class="list" style="margin-top:14px;">
+          <div class="list-item"><div><strong>CPU</strong><p class="muted">On by default.</p></div><label class="toggle"><input type="checkbox" checked><span></span></label></div>
+          <div class="list-item"><div><strong>GPU <span class="kbd">Advanced</span></strong><p class="muted">Share when available.</p></div><label class="toggle"><input type="checkbox"><span></span></label></div>
+          <div class="list-item"><div><strong>Bandwidth</strong><p class="muted">Share internet bandwidth.</p></div><label class="toggle"><input type="checkbox" checked><span></span></label></div>
+        </div>
+        <div class="row" style="justify-content:space-between; margin-top:18px;">
+          <button class="btn btn-secondary" data-action="back">Back</button>
+          <button class="btn btn-primary" data-action="advance" data-to="4">Save &amp; Continue</button>
+        </div>
+      </div>
+
+      <div class="card step" data-step="4" data-role="client">
+        <h1>Verify Your Wallet</h1>
+        <p>Sign a message with your wallet to verify ownership.</p>
+        <div class="row" style="justify-content:space-between; margin-top:18px;">
+          <button class="btn btn-secondary" data-action="back">Back</button>
+          <button class="btn btn-primary" data-action="advance" data-to="5">Verify Wallet</button>
+        </div>
+      </div>
+
+      <div class="card step" data-step="5" data-role="client">
+        <h1>Active Session</h1>
+        <p class="muted">Your browser is contributing.</p>
+        <div class="grid" style="margin-top:14px; grid-template-columns: repeat(4, 1fr);">
+          <div class="tile"><div class="value" id="client-today">12.45</div><div class="label">Today</div></div>
+          <div class="tile"><div class="value" id="client-session">02:34:18</div><div class="label">Session</div></div>
+          <div class="tile"><div class="value" id="client-rep">98%</div><div class="label">Reputation</div></div>
+          <div class="tile"><div class="value" id="client-tasks">128</div><div class="label">Tasks (+12/hr)</div></div>
+        </div>
+        <div class="row" style="justify-content:space-between; margin-top:18px;">
+          <button class="btn btn-secondary" data-action="pause">Pause Sharing</button>
+          <button class="btn btn-secondary" data-action="back">Back</button>
+          <button class="btn btn-primary" data-action="advance" data-to="6">Withdraw</button>
+        </div>
+      </div>
+
+      <div class="card step" data-step="6" data-role="client">
+        <h1>Withdraw &amp; Payouts</h1>
+        <p>Access earnings and flexible payout settings.</p>
+        <div class="list" style="margin-top:14px;">
+          <div class="list-item"><div><strong>Available Balance</strong><p class="muted">12.45 (~ $1.24 USD)</p></div><div class="icon">💎</div></div>
+          <div class="list-item"><div><strong>Wallet</strong><p class="muted">0xA1B2...C3D4E5F6G7H8I9J0K</p></div><div class="icon">🪪</div></div>
+        </div>
+        <div class="row" style="justify-content:space-between; margin-top:18px;">
+          <button class="btn btn-secondary" data-action="back">Back</button>
+          <button class="btn btn-primary">Withdraw</button>
+        </div>
+      </div>
+
+      <div class="card step" data-step="1" data-role="publisher">
+        <h1>Publisher Setup</h1>
+        <p>Set up your organization and preferred login options.</p>
+        <div class="list" style="margin-top:14px;">
+          <div class="list-item"><div><strong>Organization Name</strong><p class="muted">e.g. Acme Media</p></div><input type="text" placeholder="Organization Name" /></div>
+          <div class="list-item"><div><strong>Website URL</strong><p class="muted">https://example.com</p></div><input type="url" placeholder="https://example.com" /></div>
+        </div>
+        <div class="row" style="justify-content:space-between; margin-top:18px;">
+          <button class="btn btn-secondary" data-action="decline">Not Now</button>
+          <button class="btn btn-primary" data-action="advance" data-to="2">Create Account</button>
+        </div>
+      </div>
+
+      <div class="card step" data-step="2" data-role="publisher">
+        <h1>Verify Domain (DNS TXT)</h1>
+        <p>Verify domain ownership via DNS TXT record.</p>
+        <div class="list" style="margin-top:14px;">
+          <div class="list-item"><div><strong>TXT Record</strong><p class="muted">Add this record to your DNS.</p></div><code>publisher-verify-9Y7b6a6c3d0h0d0c8d7ef8e5d0c</code></div>
+        </div>
+        <div class="row" style="justify-content:space-between; margin-top:18px;">
+          <button class="btn btn-secondary" data-action="back">Back</button>
+          <button class="btn btn-primary" data-action="advance" data-to="4">Check Verification</button>
+        </div>
+      </div>
+
+      <div class="card step" data-step="3" data-role="publisher">
+        <h1>Set Up Payout Wallet</h1>
+        <p>Create or connect a wallet to receive your payouts.</p>
+        <div class="list" style="margin-top:14px;">
+          <div class="list-item"><div><strong>Embedded Wallet</strong><p class="muted">Auto-create a non-custodial wallet with passkey.</p></div><button class="btn btn-primary" data-action="privy-login">Create Wallet</button></div>
+        </div>
+        <div class="row" style="justify-content:space-between; margin-top:18px;">
+          <button class="btn btn-secondary" data-action="back">Back</button>
+          <button class="btn btn-primary" data-action="advance" data-to="4">Sign to Verify</button>
+        </div>
+      </div>
+
+      <div class="card step" data-step="4" data-role="publisher">
+        <h1>Create Placement / Page</h1>
+        <p>Define where and how the widget can run and split rewards.</p>
+        <div class="list" style="margin-top:14px;">
+          <div class="list-item"><div><strong>Page ID</strong><p class="muted">e.g. home-page</p></div><input type="text" placeholder="home-page" /></div>
+          <div class="list-item"><div><strong>Placement ID</strong><p class="muted">e.g. hero-widget</p></div><input type="text" placeholder="hero-widget" /></div>
+          <div class="list-item"><div><strong>Allowed Domain</strong><p class="muted">https://example.com</p></div><input type="url" placeholder="https://example.com" /></div>
+        </div>
+        <div class="row" style="justify-content:space-between; margin-top:18px;">
+          <button class="btn btn-secondary" data-action="back">Back</button>
+          <button class="btn btn-primary" data-action="advance" data-to="5">Save Placement</button>
+        </div>
+      </div>
+
+      <div class="card step" data-step="5" data-role="publisher">
+        <h1>Get Embed Code</h1>
+        <p>Copy the embed code and add it to your site.</p>
+        <div class="list" style="margin-top:14px;">
+          <div class="list-item"><div><strong>Script</strong><p class="muted">Add to &lt;head&gt;</p></div><code style="font-size:12px;">&lt;script src="https://worker.templeearth.cc/embed.js"&gt;&lt;/script&gt;</code></div>
+          <div class="list-item"><div><strong>Iframe</strong><p class="muted">Where you want the widget</p></div><code style="font-size:12px;">&lt;iframe src="https://worker.templeearth.cc"&gt;&lt;/iframe&gt;</code></div>
+        </div>
+        <div class="row" style="justify-content:space-between; margin-top:18px;">
+          <button class="btn btn-secondary" data-action="back">Back</button>
+          <button class="btn btn-primary" data-action="advance" data-to="6">Close</button>
+        </div>
+      </div>
+
+      <div class="card step" data-step="6" data-role="publisher">
+        <h1>Publisher Rewards Dashboard</h1>
+        <p class="muted">Monitor performance, earnings, and withdraw your rewards.</p>
+        <div class="grid" style="margin-top:14px; grid-template-columns: repeat(4, 1fr);">
+          <div class="tile"><div class="value" id="pub-verified">24</div><div class="label">Verified Pages</div></div>
+          <div class="tile"><div class="value" id="pub-sessions">5,842</div><div class="label">Active Sessions</div></div>
+          <div class="tile"><div class="value" id="pub-pending">$12.45</div><div class="label">Pending Rewards</div></div>
+          <div class="tile"><div class="value">$128.90</div><div class="label">Total Earned</div></div>
+        </div>
+        <div class="row" style="justify-content:space-between; margin-top:18px;">
+          <button class="btn btn-secondary" data-action="back">Back</button>
+          <button class="btn btn-primary" data-action="advance" data-to="1">Reset</button>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="footer-hint">Browser-native. No download required.</div>
+      <div class="footer-hint" id="status"><span class="strobe idle" id="dot"></span><span id="status-text">Idle</span></div>
+    </footer>
+  </div>
+
+  <script src="https://cdn.privy.io/privy/latest/privy.js" crossorigin="anonymous"></script>
+  <script>
+    const APP_ID = 'cmq0jejs1001l0cjy5a1v0hcb';
+    let role = 'client';
+    let currentStep = 1;
+    let privyReady = false;
+    let privyInstance = null;
+    let heartbeat = null;
+    let runningSec = 0;
+    const HUE_CLIENT = '#66fcf1';
+    const HUE_PUBLISHER = '#ffbe0b';
+    function setStatus(text, mode='idle') {
+      const dot = document.getElementById('dot');
+      const statusText = document.getElementById('status-text');
+      const pill = document.getElementById('step-pill');
+      dot.className = 'strobe ' + (mode === 'running' ? '' : mode === 'warn' ? 'warn' : mode === 'error' ? 'error' : 'idle');
+      if (statusText) statusText.textContent = text;
+      if (pill) pill.textContent = `Step ${currentStep} / 6`;
+    }
+    function getStepEl(n) { return document.querySelector(`.step[data-step="${n}"][data-role="${role}"]`); }
+    function setStep(n) {
+      currentStep = n;
+      document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+      let target = document.querySelector(`.step[data-step="${n}"]`);
+      if (!target) target = document.querySelector(`.step[data-step="${n}"][data-role="${role}"]`);
+      if (!target) target = document.querySelector('.step.active');
+      if (target) target.classList.add('active');
+      setStatus('Privy ready', 'idle');
+    }
+    function initPrivy() {
+      try {
+        if (typeof Privy === 'undefined') {
+          setStatus('Privy unavailable', 'warn');
+          return;
+        }
+        privyInstance = new Privy({ appId: APP_ID });
+        privyReady = true;
+        setStatus('Privy ready', 'idle');
+      } catch (e) {
+        privyReady = false;
+        setStatus('Privy init failed', 'warn');
+        console.warn('Privy init failed', e);
+      }
+    }
+    async function privyLogin() {
+      if (!privyReady || !privyInstance) {
+        setStatus('Privy unavailable', 'warn');
+        return false;
+      }
+      try {
+        // Try email provider first, then fallback to default
+        await privyInstance.login({ provider: 'email' });
+        setStatus('Privy authenticated', 'running');
+        return true;
+      } catch (e) {
+        // Fallback to default login if email fails
+        try {
+          await privyInstance.login();
+          setStatus('Privy authenticated', 'running');
+          return true;
+        } catch (e2) {
+          setStatus('Privy authentication failed', 'error');
+          console.error('Privy login error:', e2);
+          return false;
+        }
+      }
+    }
+      try {
+        await privyInstance.login();
+        setStatus('Privy authenticated', 'running');
+        return true;
+      } catch (e) {
+        setStatus('Privy authentication failed', 'error');
+        console.error('Privy login error:', e);
+        return false;
+      }
+    }
+    function applyRolePalette(roleName) {
+      const body = document.body;
+      body.setAttribute('data-role', roleName);
+      document.documentElement.style.setProperty('--accent', roleName === 'publisher' ? HUE_PUBLISHER : HUE_CLIENT);
+      document.documentElement.style.setProperty('--accent-2', roleName === 'publisher' ? '#d8b96b' : '#45a29e');
+      document.documentElement.style.setProperty('--muted', roleName === 'publisher' ? '#d8b96b' : '#8b8fa3');
+      const roleLabel = document.getElementById('role');
+      if (roleLabel) roleLabel.textContent = roleName.toUpperCase();
+    }
+    window.addEventListener('load', () => {
+      setTimeout(initPrivy, 800);
+      applyRolePalette('client');
+      document.body.addEventListener('click', async (e) => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        if (action === 'advance') {
+          const to = parseInt(btn.dataset.to || '1', 10);
+          setStep(to);
+        } else if (action === 'back') { setStep(currentStep - 1); }
+        else if (action === 'decline') { setStatus('Flow declined', 'warn'); }
+        else if (action === 'pause') { setStatus('Sharing paused', 'warn'); }
+        else if (action === 'privy-login') { const ok = await privyLogin(); if (ok) setStatus('Privy authenticated', 'running'); }
+      });
+      document.querySelectorAll('[data-role]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          role = e.target.dataset.role;
+          applyRolePalette(role);
+          setStatus('Role: ' + role, 'running');
+          setStep(1);
+        });
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          setStatus('Resumed', 'running');
+          clearInterval(heartbeat);
+          heartbeat = setInterval(() => {
+            runningSec += 1;
+            setStatus('Running ' + new Date(runningSec * 1000).toISOString().substring(11, 19), 'running');
+          }, 1000);
+        } else {
+          clearInterval(heartbeat);
+          setStatus('Backgrounded', 'warn');
+        }
+      });
+      clearInterval(heartbeat);
+      heartbeat = setInterval(() => {
+        runningSec += 1;
+        setStatus('Running ' + new Date(runningSec * 1000).toISOString().substring(11, 19), 'running');
+      }, 1000);
+    });
+  </script>
 </body>
 </html>
